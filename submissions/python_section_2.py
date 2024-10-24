@@ -20,7 +20,6 @@ def calculate_distance_matrix(df) -> pd.DataFrame():
             for j in toll_ids:
                 if distance_matrix.at[i, j] > distance_matrix.at[i, k] + distance_matrix.at[k, j]:
                     distance_matrix.at[i, j] = distance_matrix.at[i, k] + distance_matrix.at[k, j]
-    
     return distance_matrix
 
 
@@ -33,9 +32,7 @@ def unroll_distance_matrix(df) -> pd.DataFrame:
             if id_start != id_end:
                 distance = df.at[id_start, id_end]
                 unrolled_data.append([id_start, id_end, distance])
-
     unrolled_df = pd.DataFrame(unrolled_data, columns=['id_start', 'id_end', 'distance'])
-
     return unrolled_df
 
 
@@ -44,14 +41,12 @@ def find_ids_within_ten_percentage_threshold(df, reference_id) -> pd.DataFrame:
     reference_avg_distance = df[df['id_start'] == reference_id]['distance'].mean()
     threshold_floor = reference_avg_distance * 0.9
     threshold_ceiling = reference_avg_distance * 1.1
-    
     matching_ids = []
     
     for id_start in df['id_start'].unique():
         avg_distance = df[df['id_start'] == id_start]['distance'].mean()
         if threshold_floor <= avg_distance <= threshold_ceiling:
             matching_ids.append(id_start)
-    
     return sorted(matching_ids)
 
 
@@ -62,7 +57,6 @@ def calculate_toll_rate(df) -> pd.DataFrame:
     df['rv'] = df['distance'] * 1.5
     df['bus'] = df['distance'] * 2.2
     df['truck'] = df['distance'] * 3.6
-    
     return df
 
 
@@ -74,14 +68,13 @@ def calculate_time_based_toll_rates(df) -> pd.DataFrame:
         (datetime.time(10, 0), datetime.time(18, 0), 1.2),
         (datetime.time(18, 0), datetime.time(23, 59, 59), 0.8)
     ]
-
+    
     new_rows = []
 
     for _, row in df.iterrows():
         for day in days:
             for start_time, end_time, weekday_discount in time_ranges:
                 new_row = row.copy()
-
                 new_row['start_day'] = day
                 new_row['end_day'] = day
                 new_row['start_time'] = start_time
@@ -94,8 +87,6 @@ def calculate_time_based_toll_rates(df) -> pd.DataFrame:
 
                 for vehicle in ['moto', 'car', 'rv', 'bus', 'truck']:
                     new_row[vehicle] *= discount
-                
-                # Convert id_start and id_end to integers
                 new_row['id_start'] = int(new_row['id_start'])
                 new_row['id_end'] = int(new_row['id_end'])
 
